@@ -1,54 +1,32 @@
 package main
 
-import "fmt"
+import (
+	"GoBanco/clientes"
+	"GoBanco/contas"
+	"fmt"
+)
 
-type ContaCorrente struct {
-	titular   string
-	nmAgencia int
-	nmConta   int
-	saldo     float64
+func PagarBoleto(conta verificarConta, valorDoBoleto float64) {
+	conta.Sacar(valorDoBoleto)
 }
 
-func (c *ContaCorrente) Sacar(valorDoSaque float64) string {
-	aviso := valorDoSaque <= c.saldo && valorDoSaque > 0
-	if aviso {
-		c.saldo -= valorDoSaque
-		return "Saque realizado com sucesso!"
-	} else {
-		return "Saldo insuficiente"
-	}
-}
-
-func (c *ContaCorrente) Deposito(valorDeposito float64) (string, float64) {
-	aviso := valorDeposito > 0
-	if aviso {
-		c.saldo += valorDeposito
-		return "Deposito realizado com sucesso!", c.saldo
-	} else {
-		return "O deposito tem que ser maior que zero!", c.saldo
-	}
-}
-
-func (c *ContaCorrente) Tranferir(valorTransferencia float64, contaDestino *ContaCorrente) bool {
-	if valorTransferencia < c.saldo && valorTransferencia > 0 {
-		c.saldo -= valorTransferencia
-		contaDestino.Deposito(valorTransferencia)
-		return true
-	} else {
-		return false
-	}
+type verificarConta interface {
+	Sacar(valor float64) string
 }
 
 func main() {
-	contaMatheus := ContaCorrente{titular: "Matheus", nmAgencia: 0061, nmConta: 585858, saldo: 100.50}
 
-	contaGustavo := ContaCorrente{titular: "Gustavo", nmAgencia: 0061, nmConta: 585859, saldo: 300.50}
+	clienteMatheus := clientes.Titular{"Pedrosa", "37448456806", "Dev"}
+	contaMatheus := contas.ContaCorrente{Titular: clienteMatheus, NmAgencia: 123, NmConta: 123456}
+	contaMatheus.Deposito(500)
+	// fmt.Println(contaMatheus.ObterSaldo())
+	contaDenis := contas.ContaPoupanca{}
 
-	fmt.Println(contaGustavo, contaMatheus)
+	contaDenis.Deposito(100)
+	PagarBoleto(&contaDenis, 50)
+	PagarBoleto(&contaMatheus, 500)
 
-	status := contaGustavo.Tranferir(200, &contaMatheus)
-	fmt.Println(status)
-
-	fmt.Println(contaGustavo, contaMatheus)
+	fmt.Println(contaDenis.ObterSaldo())
+	fmt.Println(contaMatheus.ObterSaldo())
 
 }
